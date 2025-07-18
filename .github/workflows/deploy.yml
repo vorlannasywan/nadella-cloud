@@ -21,7 +21,7 @@ jobs:
       - name: Deploy to ECS
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@52.62.233.246  << 'EOF'
-            cd /var/www/tugas2/web-porto
+            cd /var/www/tugas2/web-nadella
             sudo git pull origin master 
             # Restart Nginx or any other service if needed
             sudo systemctl restart nginx
