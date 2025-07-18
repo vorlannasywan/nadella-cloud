@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Unggah dan Lihat File</title>
+</head>
+<body>
+  <h2>Unggah File</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="file" required>
+    <button type="submit">Unggah</button>
+  </form>
+  <h2>File Saya</h2>
+  <ul id="fileList"></ul>
+  <button onclick="logout()">Logout</button>
+  <script>
+    async function loadFiles() {
+      const res = await fetch('/files', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+      });
+      const files = await res.json();
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      files.forEach(file => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="${file.s3_url}" target="_blank">${file.file_name}</a>`;
+        fileList.appendChild(li);
+      });
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('file', document.getElementById('file').files[0]);
+      const res = await fetch('/upload', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: formData,
+      });
+      const data = await res.text();
+      alert(data);
+      loadFiles();
+    });
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/login.html';
+    }
+
+    window.onload = loadFiles;
+  </script>
+</body>
+</html>
