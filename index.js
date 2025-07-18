@@ -6,13 +6,12 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('./config/db');
-require('dotenv').config();
 const authenticateToken = require('./middleware/auth');
+require('dotenv').config();
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
-// Konfigurasi AWS S3
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -20,11 +19,25 @@ AWS.config.update({
 });
 const s3 = new AWS.S3();
 
-// Middleware
 app.use(express.json());
-app.use(express.static('views'));
 
-// Endpoint Registrasi
+// Serve static files (login & register pages)
+app.use('/login.html', express.static(path.join(__dirname, 'views', 'login.html')));
+app.use('/register.html', express.static(path.join(__dirname, 'views', 'register.html')));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Redirect root ke login
+app.get('/', (req, res) => {
+  res.redirect('/login.html');
+});
+
+app.get('/index.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
+
+
+// Register
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -40,11 +53,13 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// Endpoint Login
+// Login
 app.post('/login', async (req, res) => {
+    
   const { username, password } = req.body;
   try {
     const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+    console.log("Menerima login dari:", username);
     if (rows.length === 0) return res.status(400).send('Pengguna tidak ditemukan.');
 
     const user = rows[0];
@@ -53,19 +68,35 @@ app.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
+    console.log("Token yang dikirim:", token);
+
   } catch (err) {
     res.status(500).send('Error saat login.');
   }
+  
+
 });
 
-// Endpoint Unggah File
+// Upload file ke S3
 app.post('/upload', authenticateToken, upload.single('file'), async (req, res) => {
   try {
     const fileContent = fs.readFileSync(req.file.path);
+    const mimeTypes = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.pdf': 'application/pdf',
+      '.txt': 'text/plain',
+    };
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
+
     const params = {
       Bucket: process.env.S3_BUCKET,
       Key: `${req.user.id}/${req.file.originalname}`,
       Body: fileContent,
+      ContentType: contentType,
     };
 
     const data = await s3.upload(params).promise();
@@ -79,11 +110,12 @@ app.post('/upload', authenticateToken, upload.single('file'), async (req, res) =
 
     res.send(`File berhasil diunggah. Lokasi: ${data.Location}`);
   } catch (err) {
+    console.error(err);
     res.status(500).send('Error saat mengunggah file.');
   }
 });
 
-// Endpoint Lihat File
+// Lihat file milik user
 app.get('/files', authenticateToken, async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT file_name, s3_url FROM files WHERE user_id = ?', [req.user.id]);
@@ -93,7 +125,6 @@ app.get('/files', authenticateToken, async (req, res) => {
   }
 });
 
-// Jalankan server
 app.listen(3000, () => {
   console.log('Server berjalan di http://localhost:3000');
 });

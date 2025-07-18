@@ -1,0 +1,188 @@
+/* style-upload.css */
+form#uploadForm, .dropzone {
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 100px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropzone.dragover {
+  background-color: #e8f0fe;
+  border: 2px dashed #1a73e8;
+}
+
+input[type="file"] {
+  flex: 1;
+  max-width: 240px;
+}
+
+/* style-filelist.css */
+ul#fileList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  list-style: none;
+}
+
+ul#fileList li {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  word-break: break-word;
+}
+
+ul#fileList li a {
+  text-decoration: none;
+  color: #1a73e8;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+ul#fileList img {
+  max-width: 100%;
+  height: 120px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+/* style-button.css */
+button {
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0c57d0;
+}
+
+button[onclick="logout()"] {
+  margin-top: 20px;
+  background-color: #d93025;
+}
+
+button[onclick="logout()"]:hover {
+  background-color: #b2221e;
+}
+
+/* style-auth.css */
+form#loginForm,
+form#registerForm {
+  background: #fff;
+  padding: 30px;
+  max-width: 400px;
+  margin: auto;
+  margin-top: 100px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(60,64,67,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+form#loginForm button,
+form#registerForm button {
+  align-self: flex-end;
+}
+
+.auth-container {
+  background: #fff;
+  padding: 40px;
+  max-width: 420px;
+  margin: 100px auto;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(60,64,67,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* style-reset.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  background-color: #f1f3f4;
+  padding: 20px;
+  color: #202124;
+}
+
+h2 {
+  margin-bottom: 20px;
+  color: #202124;
+}
+
+p a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+p a:hover {
+  text-decoration: underline;
+}
+
+/* style-darkmode.css */
+/* Mode terang saja, dark mode di-nonaktifkan */
+body.dark {
+  background-color: #f1f3f4;
+  color: #202124;
+}
+
+body.dark .auth-container,
+body.dark form#uploadForm,
+body.dark .dropzone,
+body.dark ul#fileList li {
+  background: #fff;
+  color: #202124;
+  box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+}
+
+body.dark input,
+body.dark button,
+body.dark a {
+  color: #ffffff;
+}
+
+body.dark input {
+  background-color: #fff;
+  border: 1px solid #ccc;
+}
+
+body.dark button {
+  background-color: #1a73e8;
+}
+
+body.dark button:hover {
+  background-color: #0c57d0;
+}

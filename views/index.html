@@ -2,18 +2,39 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Upload dan Lihat File</title>
+  <title>Unggah dan Lihat File</title>
+<link rel="stylesheet" href="/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
 </head>
 <body>
-  <h2>Upload File</h2>
+
+  <h2>Unggah File</h2>
   <form id="uploadForm" enctype="multipart/form-data">
     <input type="file" id="file" required>
-    <button type="submit">Upload</button>
+    <button type="submit">Unggah</button>
   </form>
+
+  <div id="dropZone" class="drop-zone">Atau tarik dan letakkan file di sini</div>
+
   <h2>File Saya</h2>
   <ul id="fileList"></ul>
-  <button onclick="logout()">Logout</button>
+
+  <button class="logout" onclick="logout()">Logout</button>
+
   <script>
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem('theme', document.body.classList.contains("dark") ? "dark" : "light");
+    }
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add("dark");
+    }
+
+    if (!localStorage.getItem('token')) {
+      window.location.href = '/login.html';
+    }
+
     async function loadFiles() {
       const res = await fetch('/files', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
@@ -23,7 +44,17 @@
       fileList.innerHTML = '';
       files.forEach(file => {
         const li = document.createElement('li');
-        li.innerHTML = `<a href="${file.s3_url}" target="_blank">${file.file_name}</a>`;
+        const ext = file.file_name.split('.').pop().toLowerCase();
+        if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
+          li.innerHTML = `<img src="${file.s3_url}" alt="image"><span>${file.file_name}</span>`;
+        } else {
+          let icon = "📄";
+          if (ext === "pdf") icon = "📕";
+          if (["doc", "docx"].includes(ext)) icon = "📘";
+          if (["xls", "xlsx"].includes(ext)) icon = "📗";
+          if (["zip", "rar"].includes(ext)) icon = "🗜️";
+          li.innerHTML = `<div style="font-size: 48px;">${icon}</div><a href="${file.s3_url}" target="_blank">${file.file_name}</a>`;
+        }
         fileList.appendChild(li);
       });
     }
@@ -37,8 +68,7 @@
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: formData,
       });
-      const data = await res.text();
-      alert(data);
+      alert(await res.text());
       loadFiles();
     });
 
@@ -48,6 +78,28 @@
     }
 
     window.onload = loadFiles;
+
+    // Drag & Drop
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/upload', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: formData,
+      });
+      alert(await res.text());
+      loadFiles();
+    });
   </script>
 </body>
 </html>
